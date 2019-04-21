@@ -1,43 +1,93 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-void main() {
-  runApp(MaterialApp(
-    home: MainActivity(),
-  ));
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+ @override
+ Widget build(BuildContext context) {
+   return MaterialApp(
+     title: 'Name My Baby',
+     theme: new ThemeData(
+       primaryColor: Colors.amber,
+     ),
+     home: MyHomePage(),
+   );
+ }
 }
 
-class MainActivity extends StatefulWidget {
-  @override
-  _MainActivityState createState() => _MainActivityState();
+class MyHomePage extends StatefulWidget {
+ @override
+ _MyHomePageState createState() {
+   return _MyHomePageState();
+ }
 }
 
-class _MainActivityState extends State<MainActivity> {
+class _MyHomePageState extends State<MyHomePage> {
+ @override
+ Widget build(BuildContext context) {
+   return Scaffold(
+     appBar: AppBar(title: Text('Baby Names Ranking')),
+     body: _buildBody(context),
+   );
+ }
 
-  final DatabaseReference database = FirebaseDatabase.instance.reference().child("test");
+  Widget _buildBody(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: Firestore.instance.collection('brazil_boy_2018').snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return LinearProgressIndicator();
 
-  sendData() {
-    database.push().set({
-      'name' : 'Peter',
-      'lastName' : 'Ross'
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Firebase"),
-        backgroundColor: Colors.amber,
-      ),
-      body: Center(
-        child: FlatButton(
-          onPressed: () => sendData(), 
-          child: Text("Send"),
-        color: Colors.amber,
-        ),
-      ),
+        return _buildList(context, snapshot.data.documents);
+      },
     );
   }
+
+ Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
+   return ListView(
+     padding: const EdgeInsets.only(top: 20.0),
+     children: snapshot.map((data) => _buildListItem(context, data)).toList(),
+   );
+ }
+
+ Widget _buildListItem(BuildContext context, DocumentSnapshot data) {
+  final record = Record.fromSnapshot(data);
+
+   return Padding(
+     key: ValueKey(record.name),
+     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+     child: Container(
+         decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+         child: ListTile(
+         title: Text(record.name),
+         leading: Text(record.rank.toString()),
+         subtitle: Text(record.meaning),
+       ),
+     ),
+   );
+ }
+}
+
+class Record {
+ final String name;
+ final int rank;
+ final String meaning;
+ final DocumentReference reference;
+
+ Record.fromMap(Map<String, dynamic> map, {this.reference})
+     : assert(map['name'] != null),
+       assert(map['rank'] != null),
+       assert(map['meaning'] != null),
+       name = map['name'],
+       rank = map['rank'],
+       meaning = map['meaning'];
+
+ Record.fromSnapshot(DocumentSnapshot snapshot)
+     : this.fromMap(snapshot.data, reference: snapshot.reference);
+
+ @override
+ String toString() => "Record<$name:$rank>";
 }
