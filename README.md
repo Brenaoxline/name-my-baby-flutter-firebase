@@ -1,16 +1,10 @@
-# name_my_baby
+# Name My Baby
 
-A new Flutter project.
+My first Flutter project, which helps you choose your baby's name.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
+## Getting Started with Flutter
 
 - [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
 - [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
+- [Online Documentation](https://flutter.io/docs)
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
